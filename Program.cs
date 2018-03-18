@@ -25,6 +25,11 @@ namespace SudokuSolverC_
             ));
 
             sudoku.print();
+
+            if(SolutionChecker.isValidSudokuSolution(sudoku))
+                Console.WriteLine("Solution Valid!");
+            else
+                Console.WriteLine("Solution Invalid...");
         }
     }
 }

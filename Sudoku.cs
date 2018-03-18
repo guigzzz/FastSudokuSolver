@@ -164,13 +164,13 @@ class SudokuSolver
         // for(int k1 = i / 3 * 3; k1 < (i + 1) / 3 * 3; k1++)
         // {
         //     for(int k2 = j / 3 * 3; k2 < (j + 1) / 3 * 3; k2++)
-        //         househidden &= (sudoku.grid[k1 + k2] == 0 && k1 != i && k2 != j) 
+        //         househidden &= (sudoku.grid[k1 * 9 + k2] == 0 && k1 != i && k2 != j) 
         //                         ? ~sudoku.Candidates[k1 + k2] : ~0;
         // }
 
         // househidden &= 0x1FF;
 
-        // if((househidden & househidden-1) == 0)
+        // if((househidden & househidden-1) == 0 && househidden > 0)
         //     return (int)Math.Log(househidden, 2) + 1;
 
         // no hidden single
@@ -231,5 +231,43 @@ class SudokuSolver
         }
         return ret;
     }
+}
 
+
+static class SolutionChecker
+{
+    public static bool isValidSudokuSolution(Sudoku sdku)
+    {
+        for(int i = 0; i < 9; i++)
+        {
+            int rowbin = 0;
+            int colbin = 0;
+
+            for(int j = 0; j < 9; j++)
+            {
+                rowbin |= 1 << (sdku.grid[i * 9 + j] - 1);
+                colbin |= 1 << (sdku.grid[j * 9 + i] - 1);
+            }
+            if(rowbin != 0x1FF || colbin != 0x1FF) return false;
+        }
+
+        for(int i = 0; i < 3; i++)
+        {
+            for(int j = 0; j < 3; j++)
+            {
+                int housebin = 0;
+                for(int k1 = i * 3; k1 < (i + 1) * 3; k1++)
+                {
+                    for(int k2 = j * 3; k2 < (j + 1) * 3; k2++)
+                    {
+                        housebin |= 1 << (sdku.grid[k1 * 9 + k2] - 1);
+                    }
+                }
+                if(housebin != 0x1FF) return false;
+            }
+        }
+        return true;
+    }
+
+    
 }
