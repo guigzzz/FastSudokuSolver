@@ -69,31 +69,6 @@ class Sudoku
             Console.WriteLine();
         }
         Console.WriteLine("---------------------");
-        // Console.WriteLine();
-        // Console.WriteLine("-------------------- Bin --------------------");
-        // foreach(var av in BinaryTaken)
-        // {
-        //     var s = Convert.ToString(av, 2).PadLeft(27, '0');
-        //     var printstr = String.Format("Subquare: {0}, Column: {1}, Row: {2}", 
-        //             s.Substring(0, 9), s.Substring(9, 9), s.Substring(18, 9));
-
-        //     Console.WriteLine(printstr);
-        // }
-        // Console.WriteLine("---------------------------------------------");
-
-        // for(int i = 0; i < 9; i++)
-        // {
-        //     if(i % 3 == 0 && i > 0) Console.WriteLine();
-        //     for(int j = 0; j < 9; j++)
-        //     {
-        //         if(j % 3 == 0 && j > 0) Console.Write("| ");
-        //         if(grid[i * 9 + j] == 0)
-        //             Console.Write(Convert.ToString(Candidates[i * 9 + j], 2).PadLeft(9, '0') + " ");
-        //         else
-        //             Console.Write("--------- ");
-        //     }
-        //     Console.WriteLine();
-        // }
     }
 
     public int this[int i, int j]
@@ -114,9 +89,17 @@ class SudokuSolver
 
         return sdku;
     }
-
     private Sudoku hiddensolve(Sudoku sdku)
     {
+
+        //refresh candidates
+        for(int i = 0; i < 9; i++)
+        {
+            for(int j = 0; j < 9; j++)
+                sdku.Candidates[i * 9 + j] = (sdku.grid[i * 9 + j] == 0) 
+                                             ? getPossibleDigits(sdku, i, j) : 0;
+        }
+
         for(int i = 0; i < 9; i++)
         {
             for(int j = 0; j < 9; j++)
@@ -126,11 +109,13 @@ class SudokuSolver
                     int hidden = checkForHiddenSingle(sdku, i, j);
                     if(hidden > 0)
                     {
+                        // Console.WriteLine(String.Format(
+                        //    "Hidden {0} @ r{1}c{2}", hidden, i+1, j+1 
+                        // ));
                         sdku.grid[i * 9 + j] = hidden;
                         sdku.BinaryTaken[i] |= 1 << (hidden - 1);
-                        sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
                         sdku.BinaryTaken[j] |= 1 << (hidden + 9 - 1);
-                        return sdku;
+                        sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
                     }
                 }
             }
@@ -142,13 +127,13 @@ class SudokuSolver
     {
         int rowhidden = sudoku.Candidates[i * 9 + j];
         int colhidden = rowhidden;
-        int househidden = rowhidden;
+        // int househidden = rowhidden;
 
         // row && col
         for(int k = 0; k < 9; k++)
         {
-            rowhidden &= (sudoku.grid[i * 9 + k] == 0 && k != j) ? ~sudoku.Candidates[i * 9 + k] : ~0;
-            colhidden &= (sudoku.grid[k * 9 + j] == 0 && k != i) ? ~sudoku.Candidates[k * 9 + j] : ~0;
+            rowhidden &= (k != j) ? ~sudoku.Candidates[i * 9 + k] : ~0;
+            colhidden &= (k != i) ? ~sudoku.Candidates[k * 9 + j] : ~0;
         }
 
         rowhidden &= 0x1FF;
@@ -180,7 +165,6 @@ class SudokuSolver
     private Sudoku nakedsolve(Sudoku sdku)
     {
         bool change = true;
-        // int min_guesses = 9;
 
         while(change)
         {
@@ -192,16 +176,18 @@ class SudokuSolver
                     if(sdku[i, j] == 0)
                     {
                         int possibleDigits = getPossibleDigits(sdku, i, j);
-                        sdku.Candidates[i * 9 + j] = possibleDigits;
 
                         // if only single digit possible in (i, j)
                         if((possibleDigits & possibleDigits-1) == 0)
                         {
                             int digit = (int)Math.Log(possibleDigits, 2) + 1;
+                            // Console.WriteLine(String.Format(
+                            //     "Naked {0} @ r{1}c{2}", digit, i+1, j+1 
+                            // ));
                             sdku[i, j] = digit;
                             sdku.BinaryTaken[i] |= 1 << (digit - 1);
-                            sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (digit + 18 - 1);
                             sdku.BinaryTaken[j] |= 1 << (digit + 9 - 1);
+                            sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (digit + 18 - 1);
                             change = true;
                         }
                     }
@@ -232,7 +218,6 @@ class SudokuSolver
         return ret;
     }
 }
-
 
 static class SolutionChecker
 {

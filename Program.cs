@@ -18,10 +18,10 @@ namespace SudokuSolverC_
             watch.Start();
             sudoku = solver.solve(sudoku);
             watch.Stop();
-            long time = watch.ElapsedMilliseconds;
+            double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
             Console.WriteLine(String.Format(
-                "Time: {0}", time
+                "Time: {0:#.####}s", time
             ));
 
             sudoku.print();
