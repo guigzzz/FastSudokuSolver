@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
+
 
 class Sudoku
 {
@@ -12,26 +14,14 @@ class Sudoku
     
     public int[] Candidates { get => candidates; set => candidates = value; }
 
-    public void loadFromFile(string file_name)
-    {
-        var parsed = System.IO.File.ReadAllText(file_name)
-                    .Split('\n')
-                    .Select(
-                       row => row.Split(' ').Select(s => Int32.Parse(s))
-                    )
-                    .SelectMany(i => i)
-                    .ToArray();
 
-        if(parsed.Length != 81)
-            Console.WriteLine("Error while reading sudoku file, it does not contain 81 numbers");
-        else
-        {
-            grid = parsed;
-            initialiseBinaryRep();
-        }
+    public Sudoku(int[] grid)
+    {
+        Array.Copy(grid, this.grid, 81);
+        updateBinaryRep();
     }
 
-    private void initialiseBinaryRep()
+    public void updateBinaryRep()
     {
         //build binary representation
         for(int i = 0; i < 9; i++)
@@ -55,20 +45,40 @@ class Sudoku
         return BinaryTaken.All(i => i == 0x7FFFFFF);
     }
 
-    public void print()
+    public override string ToString()
     {
-        Console.WriteLine("---------------------");
+        return SudokuUtils.gridToString(grid);
+    }
+    public void printPossibleDigits()
+    {
+        Console.WriteLine(new String('-', 93));
         for(int i = 0; i < 9; i++)
         {
             if(i % 3 == 0 && i > 0) Console.WriteLine();
             for(int j = 0; j < 9; j++)
             {
                 if(j % 3 == 0 && j > 0) Console.Write("| ");
-                Console.Write(String.Format("{0} ", grid[i * 9 + j]));
+
+                int checker = 0x100;
+                if(candidates[i * 9 + j] > 0)
+                {
+                    for(int k = 9; k > 0; k--)
+                    {
+                        if((candidates[i * 9 + j] & checker) == checker) Console.Write(k.ToString());
+                        else Console.Write("-");
+                        checker >>= 1;
+                    }
+                    Console.Write(" ");
+                }
+                else
+                {
+                    Console.Write("    -     ");
+                }
+
             }
             Console.WriteLine();
         }
-        Console.WriteLine("---------------------");
+        Console.WriteLine(new String('-', 93));
     }
 
     public int this[int i, int j]
@@ -80,25 +90,41 @@ class Sudoku
 
 class SudokuSolver
 {
-    public Sudoku solve(Sudoku sdku)
+    public Sudoku solve(int[] sdku, int depth)
     {
-        while(!sdku.isSolved())
-        {
-            sdku = hiddensolve(nakedsolve(sdku));
-        }
+        var sudoku = new Sudoku(sdku);
 
-        return sdku;
+        while(!sudoku.isSolved())
+        {
+            bool? hasChanged = trysolve(sudoku);
+            // Console.WriteLine(hasChanged == true);
+            
+            if(hasChanged == null) return null;
+            else if(hasChanged == false) // need to guess
+            {
+                int guessloc = selectBestGuessLocation(sudoku);
+                List<int> digits = digits_from_bits(sudoku.Candidates[guessloc]);
+                if(guessloc > 0) Console.WriteLine(guessloc + " " + depth);
+                foreach(var d in digits)
+                {
+                    // Console.Write(d);
+                    sudoku.grid[guessloc] = d;
+                    Sudoku res = solve(sudoku.grid, depth + 1);
+                    Console.WriteLine(sudoku.ToString());
+                    if(res != null)
+                    {
+                        sudoku = res;
+                        break;                        
+                    }
+                }
+            }
+        }
+        return sudoku;
     }
-    private Sudoku hiddensolve(Sudoku sdku)
-    {
 
-        //refresh candidates
-        for(int i = 0; i < 9; i++)
-        {
-            for(int j = 0; j < 9; j++)
-                sdku.Candidates[i * 9 + j] = (sdku.grid[i * 9 + j] == 0) 
-                                             ? getPossibleDigits(sdku, i, j) : 0;
-        }
+    private bool? trysolve(Sudoku sdku)
+    {
+        bool change = false;
 
         for(int i = 0; i < 9; i++)
         {
@@ -106,28 +132,62 @@ class SudokuSolver
             {
                 if(sdku.grid[i * 9 + j] == 0)
                 {
-                    int hidden = checkForHiddenSingle(sdku, i, j);
-                    if(hidden > 0)
+                    int possibleDigits = getPossibleDigits(sdku, i, j);
+
+                    // invalid grid
+                    if(possibleDigits == 0) return null;
+
+                    // if only single digit possible in (i, j)
+                    if((possibleDigits & possibleDigits-1) == 0)
                     {
-                        // Console.WriteLine(String.Format(
-                        //    "Hidden {0} @ r{1}c{2}", hidden, i+1, j+1 
-                        // ));
-                        sdku.grid[i * 9 + j] = hidden;
-                        sdku.BinaryTaken[i] |= 1 << (hidden - 1);
-                        sdku.BinaryTaken[j] |= 1 << (hidden + 9 - 1);
-                        sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
+                        int digit = (int)Math.Log(possibleDigits, 2) + 1;
+                        sdku.grid[i * 9 + j] = digit;
+                        sdku.BinaryTaken[i] |= 1 << (digit - 1);
+                        sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (digit + 18 - 1);
+                        sdku.BinaryTaken[j] |= 1 << (digit + 9 - 1);
+                        change = true;
                     }
                 }
             }
         }
-        return sdku;
+        // sdku.updateBinaryRep();
+
+        if(!change)
+        {
+            // update candidates
+            for(int i = 0; i < 9; i++)
+            {
+                for(int j = 0; j < 9; j++)
+                    sdku.Candidates[i * 9 + j] = (sdku.grid[i * 9 + j] == 0) 
+                                                ? getPossibleDigits(sdku, i, j) : 0;
+            }
+
+            for(int i = 0; i < 9; i++)
+            {
+                for(int j = 0; j < 9; j++)
+                {
+
+                    int hidden = checkForHiddenSingle(sdku, i, j);
+                    if(hidden > 0)
+                    {
+                        // Console.WriteLine(String.Format(
+                        //     "Hidden {0} @ r{1}c{2}", hidden, i+1, j+1 
+                        // ));
+                        sdku.grid[i * 9 + j] = hidden;
+                        change = true;
+                    }
+                }
+            }
+            sdku.updateBinaryRep();
+        }
+        return change;
     }
 
     private int checkForHiddenSingle(Sudoku sudoku, int i, int j)
     {
         int rowhidden = sudoku.Candidates[i * 9 + j];
         int colhidden = rowhidden;
-        // int househidden = rowhidden;
+        int househidden = rowhidden;
 
         // row && col
         for(int k = 0; k < 9; k++)
@@ -145,12 +205,15 @@ class SudokuSolver
         if((colhidden & colhidden-1) == 0 && colhidden > 0)
             return (int)Math.Log(colhidden, 2) + 1;
 
+
         //house
         // for(int k1 = i / 3 * 3; k1 < (i + 1) / 3 * 3; k1++)
         // {
         //     for(int k2 = j / 3 * 3; k2 < (j + 1) / 3 * 3; k2++)
-        //         househidden &= (sudoku.grid[k1 * 9 + k2] == 0 && k1 != i && k2 != j) 
-        //                         ? ~sudoku.Candidates[k1 + k2] : ~0;
+        //     {
+        //         househidden &= (k1 != i || k2 != j) 
+        //                         ? ~sudoku.Candidates[k1 * 9 + k2] : ~0;
+        //     }
         // }
 
         // househidden &= 0x1FF;
@@ -162,39 +225,21 @@ class SudokuSolver
         return 0;
     }
 
-    private Sudoku nakedsolve(Sudoku sdku)
+    private int selectBestGuessLocation(Sudoku sudoku)
     {
-        bool change = true;
+        int minimum = 9;
+        int minindex = 0;
 
-        while(change)
+        for(int i = 0; i < 81; i++)
         {
-            change = false;
-            for(int i = 0; i < 9; i++)
+            int weight = HammingWeight(sudoku[i / 9, i % 9]);
+            if(weight < minimum && sudoku.grid[i] == 0)
             {
-                for(int j = 0; j < 9; j++)
-                {
-                    if(sdku[i, j] == 0)
-                    {
-                        int possibleDigits = getPossibleDigits(sdku, i, j);
-
-                        // if only single digit possible in (i, j)
-                        if((possibleDigits & possibleDigits-1) == 0)
-                        {
-                            int digit = (int)Math.Log(possibleDigits, 2) + 1;
-                            // Console.WriteLine(String.Format(
-                            //     "Naked {0} @ r{1}c{2}", digit, i+1, j+1 
-                            // ));
-                            sdku[i, j] = digit;
-                            sdku.BinaryTaken[i] |= 1 << (digit - 1);
-                            sdku.BinaryTaken[j] |= 1 << (digit + 9 - 1);
-                            sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (digit + 18 - 1);
-                            change = true;
-                        }
-                    }
-                }
+                minimum = weight;
+                minindex = i;
             }
         }
-        return sdku;
+        return minindex;
     }
 
     private int getPossibleDigits(Sudoku sudoku, int i, int j)
@@ -217,42 +262,11 @@ class SudokuSolver
         }
         return ret;
     }
-}
 
-static class SolutionChecker
-{
-    public static bool isValidSudokuSolution(Sudoku sdku)
+    public int HammingWeight(int value)
     {
-        for(int i = 0; i < 9; i++)
-        {
-            int rowbin = 0;
-            int colbin = 0;
-
-            for(int j = 0; j < 9; j++)
-            {
-                rowbin |= 1 << (sdku.grid[i * 9 + j] - 1);
-                colbin |= 1 << (sdku.grid[j * 9 + i] - 1);
-            }
-            if(rowbin != 0x1FF || colbin != 0x1FF) return false;
-        }
-
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-            {
-                int housebin = 0;
-                for(int k1 = i * 3; k1 < (i + 1) * 3; k1++)
-                {
-                    for(int k2 = j * 3; k2 < (j + 1) * 3; k2++)
-                    {
-                        housebin |= 1 << (sdku.grid[k1 * 9 + k2] - 1);
-                    }
-                }
-                if(housebin != 0x1FF) return false;
-            }
-        }
-        return true;
+        value = value - ((value >> 1) & 0x55555555);
+        value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
+        return (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
     }
-
-    
 }
