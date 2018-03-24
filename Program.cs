@@ -35,6 +35,7 @@ namespace SudokuSolverC_
             //     "Time: {0:#.####}s", time
             // ));
             JSolveBenchmark();
+            // OneMillionBenchmark();
         }
 
 
@@ -66,44 +67,41 @@ namespace SudokuSolverC_
             double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
             Console.WriteLine(String.Format(
-                "Time for Jsolve benchmark: {0:#.####}s", time
+                "Time for Jsolve benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+                time, time / (50 * sudokus.Count)
             ));
         }
 
-        // static void Main(string[] args)
-        // {
-        //     List<Tuple<int[], int[]>> sudokus = SudokuCSV.readFromCSV("sudoku.csv", 1000000);
-        //     SudokuSolver solver = new SudokuSolver();
+        static void OneMillionBenchmark()
+        {
+            // https://www.kaggle.com/bryanpark/sudoku
+            List<Tuple<int[], int[]>> sudokus = SudokuCSV.readFromCSV("sudoku.csv", 1000000);
+            SudokuSolver solver = new SudokuSolver();
 
-        //     var watch = new Stopwatch();
-        //     watch.Start();
+            var watch = new Stopwatch();
+            watch.Start();
             
-        //     foreach(var s in sudokus)
-        //     {
-        //         Sudoku solved = solver.solve(s.Item1);
-        //         if(!solved.grid.SequenceEqual(s.Item2))
-        //         {
-        //             throw new Exception(String.Format(
-        //                 "Failed for:\n {0}\n Got:\n{1}\nExpected:\n{2}\n", 
-        //                 SudokuUtils.gridToString(s.Item1),
-        //                 SudokuUtils.gridToString(solved.grid),
-        //                 SudokuUtils.gridToString(s.Item2)
-        //                 ));
-        //         }
-        //     }
-        //     watch.Stop();
-
-        //     Console.WriteLine(String.Format(
-        //         "> {0} Sudokus passed", sudokus.Count
-        //         ));
-
+            foreach(var s in sudokus)
+            {
+                Sudoku solved = solver.solve(s.Item1);
+                if(!solved.grid.SequenceEqual(s.Item2))
+                {
+                    throw new Exception(String.Format(
+                        "Failed for:\n {0}\n Got:\n{1}\nExpected:\n{2}\n", 
+                        SudokuUtils.gridToString(s.Item1),
+                        SudokuUtils.gridToString(solved.grid),
+                        SudokuUtils.gridToString(s.Item2)
+                        ));
+                }
+            }
+            watch.Stop();
             
-        //     double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
+            double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
-        //     Console.WriteLine(String.Format(
-        //         "Total time: {0:##.##}s\nAverage time per grid: {1}s", 
-        //         time, time / sudokus.Count
-        //     ));
-        // }
+            Console.WriteLine(String.Format(
+                "Time for One Million Sudokus Benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+                time, time / sudokus.Count
+            ));
+        }
     }
 }

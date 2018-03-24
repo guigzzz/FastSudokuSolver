@@ -124,9 +124,25 @@ class SudokuSolver
 
     private bool? trysolve(Sudoku sdku)
     {
-        bool change = false;
-        sdku.updateBinaryRep();
+        bool change = true;
+
+        change = false;
         // single naked
+        bool? nakedpasschange = nakedSinglePass(sdku);
+
+        if(nakedpasschange == null) return null;
+        else change = (bool)nakedpasschange;
+
+        if(!change)
+        {
+            change = hiddenSinglePass(sdku);
+        }
+        return change;
+    }
+
+    private bool? nakedSinglePass(Sudoku sdku)
+    {
+        bool change = false;
         for(int i = 0; i < 9; i++)
         {
             for(int j = 0; j < 9; j++)
@@ -136,19 +152,12 @@ class SudokuSolver
                     int possibleDigits = getPossibleDigits(sdku, i, j);
 
                     // invalid grid
-                    if(possibleDigits == 0){
-                        // Console.WriteLine(String.Format("no possible digits @ r{0}c{1}", i+1, j+1));
-                        return null;
-                    } 
+                    if(possibleDigits == 0) return null;
 
                     // if only single digit possible in (i, j)
                     if((possibleDigits & possibleDigits-1) == 0)
                     {
                         int digit = (int)Math.Log(possibleDigits, 2) + 1;
-                        // if(digit == 0)
-                        //     Console.WriteLine(String.Format(
-                        //         "Naked {0} @ r{1}c{2}", digit, i+1, j+1 
-                        //     ));
                         sdku.grid[i * 9 + j] = digit;
                         sdku.BinaryTaken[i] |= 1 << (digit - 1);
                         sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (digit + 18 - 1);
@@ -158,45 +167,34 @@ class SudokuSolver
                 }
             }
         }
-        // if(change) Console.WriteLine();
-        // else Console.WriteLine("no naked");
-        // sdku.updateBinaryRep();
+        return change;
+    }
 
-        if(!change)
+    private bool hiddenSinglePass(Sudoku sdku)
+    {
+        bool change = false;
+        for(int i = 0; i < 9; i++)
         {
-            // hidden naked
+            for(int j = 0; j < 9; j++)
+                sdku.Candidates[i * 9 + j] = (sdku.grid[i * 9 + j] == 0) 
+                                            ? getPossibleDigits(sdku, i, j) : 0;
+        }
 
-            // update candidates
-            for(int i = 0; i < 9; i++)
+        for(int i = 0; i < 9; i++)
+        {
+            for(int j = 0; j < 9; j++)
             {
-                for(int j = 0; j < 9; j++)
-                    sdku.Candidates[i * 9 + j] = (sdku.grid[i * 9 + j] == 0) 
-                                                ? getPossibleDigits(sdku, i, j) : 0;
-            }
 
-            for(int i = 0; i < 9; i++)
-            {
-                for(int j = 0; j < 9; j++)
+                int hidden = checkForHiddenSingle(sdku, i, j);
+                if(hidden > 0)
                 {
-
-                    int hidden = checkForHiddenSingle(sdku, i, j);
-                    if(hidden > 0)
-                    {
-                        // if(hidden == 0)
-                        //     Console.WriteLine(String.Format(
-                        //         "Hidden {0} @ r{1}c{2}", hidden, i+1, j+1 
-                        //     ));
-                        sdku.grid[i * 9 + j] = hidden;
-                        change = true;
-                        sdku.BinaryTaken[i] |= 1 << (hidden - 1);
-                        sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
-                        sdku.BinaryTaken[j] |= 1 << (hidden + 9 - 1);
-                    }
+                    sdku.grid[i * 9 + j] = hidden;
+                    change = true;
+                    sdku.BinaryTaken[i] |= 1 << (hidden - 1);
+                    sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
+                    sdku.BinaryTaken[j] |= 1 << (hidden + 9 - 1);
                 }
             }
-            // if(change) Console.WriteLine();
-            // else Console.WriteLine("no hidden");
-            // sdku.updateBinaryRep();
         }
         return change;
     }
@@ -256,7 +254,6 @@ class SudokuSolver
         }
         return minindex;
     }
-
     private int getPossibleDigits(Sudoku sudoku, int i, int j)
     {
         int possibleDigits = ~(
@@ -266,7 +263,6 @@ class SudokuSolver
             ) & 0x1FF;
         return possibleDigits;
     }
-
     private List<int> digitsFromBits(int bits)
     {
         var ret = new List<int>(9);
@@ -277,12 +273,10 @@ class SudokuSolver
         }
         return ret;
     }
-
     private int HammingWeight(int value)
     {
         value = value - ((value >> 1) & 0x55555555);
         value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
         return (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
     }
-
 }
