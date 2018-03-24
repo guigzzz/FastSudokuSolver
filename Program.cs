@@ -10,36 +10,11 @@ namespace SudokuSolverC_
     {
         static void Main(string[] args)
         {
-            // var watch = new Stopwatch();
-
-            // List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("top1465.txt");
-            
-            // SudokuSolver solver = new SudokuSolver();
-
-            // watch.Start();
-            // foreach(var s in sudokus)
-            // {
-            //     Sudoku solved = solver.solve(s);
-            //     if(!SudokuUtils.isValidSudokuSolution(solved))
-            //         throw new Exception(String.Format(
-            //             "Failed for:\n {0}\n Got:\n{1}\n", 
-            //             SudokuUtils.gridToString(s),
-            //             SudokuUtils.gridToString(solved.grid)
-            //             ));
-
-            // }
-            // watch.Stop();
-            // double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
-
-            // Console.WriteLine(String.Format(
-            //     "Time: {0:#.####}s", time
-            // ));
-            JSolveBenchmark();
+            JSolveBenchmark(1);
             // OneMillionBenchmark();
+            // sudoku1465Benchmark();
         }
-
-
-        static void JSolveBenchmark()
+        static void JSolveBenchmark(int averages)
         {
             //http://attractivechaos.github.io/plb/
             var watch = new Stopwatch();
@@ -47,31 +22,35 @@ namespace SudokuSolverC_
             List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("worstcase.txt");
             
             SudokuSolver solver = new SudokuSolver();
-
-            watch.Start();
-            for(int i = 0; i < 50; i++)
+            long times = 0;
+            for(int a = 0; a < averages; a++)
             {
-                foreach(var s in sudokus)
+                watch.Start();
+                for(int i = 0; i < 50; i++)
                 {
-                    Sudoku solved = solver.solve(s);
-                    if(!SudokuUtils.isValidSudokuSolution(solved))
-                        throw new Exception(String.Format(
-                            "Failed for:\n {0}\n Got:\n{1}\n", 
-                            SudokuUtils.gridToString(s),
-                            SudokuUtils.gridToString(solved.grid)
-                            ));
+                    foreach(var s in sudokus)
+                    {
+                        Sudoku solved = solver.solve(s);
+                        if(!SudokuUtils.isValidSudokuSolution(solved))
+                            throw new Exception(String.Format(
+                                "Failed for:\n {0}\n Got:\n{1}\n", 
+                                SudokuUtils.gridToString(s),
+                                SudokuUtils.gridToString(solved.grid)
+                                ));
+                    }
                 }
+                watch.Stop();
+                times += watch.ElapsedTicks;
             }
             
-            watch.Stop();
-            double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
+            double time = times / (double)Stopwatch.Frequency;
+            time /= averages;
 
             Console.WriteLine(String.Format(
-                "Time for Jsolve benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
-                time, time / (50 * sudokus.Count)
+                "Average Time over {2} Jsolve benchmarks: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+                time, time / (50 * sudokus.Count), averages
             ));
         }
-
         static void OneMillionBenchmark()
         {
             // https://www.kaggle.com/bryanpark/sudoku
@@ -99,8 +78,39 @@ namespace SudokuSolverC_
             double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
             Console.WriteLine(String.Format(
-                "Time for One Million Sudokus Benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+                "Time for One Million Sudokus Benchmark: {0:#.####}s\nAverage time per grid: {1}s", 
                 time, time / sudokus.Count
+            ));
+        }
+
+        static void sudoku1465Benchmark()
+        {
+            List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("top1465.txt");
+            
+            SudokuSolver solver = new SudokuSolver();
+
+            var watch = new Stopwatch();
+            watch.Start();
+            for(int i = 0; i < 64; i++)
+            {
+                foreach(var s in sudokus)
+                {
+                    Sudoku solved = solver.solve(s);
+                    if(!SudokuUtils.isValidSudokuSolution(solved))
+                        throw new Exception(String.Format(
+                            "Failed for:\n {0}\n Got:\n{1}\n", 
+                            SudokuUtils.gridToString(s),
+                            SudokuUtils.gridToString(solved.grid)
+                            ));
+                }
+            }
+            
+            watch.Stop();
+            double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
+
+            Console.WriteLine(String.Format(
+                "Time for 1465*64 benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+                time, time / (50 * sudokus.Count)
             ));
         }
     }
