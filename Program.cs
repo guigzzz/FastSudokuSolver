@@ -10,6 +10,37 @@ namespace SudokuSolverC_
     {
         static void Main(string[] args)
         {
+            // var watch = new Stopwatch();
+
+            // List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("top1465.txt");
+            
+            // SudokuSolver solver = new SudokuSolver();
+
+            // watch.Start();
+            // foreach(var s in sudokus)
+            // {
+            //     Sudoku solved = solver.solve(s);
+            //     if(!SudokuUtils.isValidSudokuSolution(solved))
+            //         throw new Exception(String.Format(
+            //             "Failed for:\n {0}\n Got:\n{1}\n", 
+            //             SudokuUtils.gridToString(s),
+            //             SudokuUtils.gridToString(solved.grid)
+            //             ));
+
+            // }
+            // watch.Stop();
+            // double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
+
+            // Console.WriteLine(String.Format(
+            //     "Time: {0:#.####}s", time
+            // ));
+            JSolveBenchmark();
+        }
+
+
+        static void JSolveBenchmark()
+        {
+            //http://attractivechaos.github.io/plb/
             var watch = new Stopwatch();
 
             List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("worstcase.txt");
@@ -17,19 +48,25 @@ namespace SudokuSolverC_
             SudokuSolver solver = new SudokuSolver();
 
             watch.Start();
-            foreach(var s in sudokus)
+            for(int i = 0; i < 50; i++)
             {
-                Sudoku solved = solver.solve(s, 0);
-                if(SudokuUtils.isValidSudokuSolution(solved))
-                    Console.WriteLine("Solution Valid!");
-                else
-                    Console.WriteLine("Solution Invalid...");
+                foreach(var s in sudokus)
+                {
+                    Sudoku solved = solver.solve(s);
+                    if(!SudokuUtils.isValidSudokuSolution(solved))
+                        throw new Exception(String.Format(
+                            "Failed for:\n {0}\n Got:\n{1}\n", 
+                            SudokuUtils.gridToString(s),
+                            SudokuUtils.gridToString(solved.grid)
+                            ));
+                }
             }
+            
             watch.Stop();
             double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
             Console.WriteLine(String.Format(
-                "Time: {0:#.####}s", time
+                "Time for Jsolve benchmark: {0:#.####}s", time
             ));
         }
 

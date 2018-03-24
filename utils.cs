@@ -24,24 +24,22 @@ static class SudokuUtils
 
     public static List<int[]> loadFromFileDotNotation(string file_name)
     {
-        var parsed = File.ReadLines(file_name)
-                        .ToArray();
-        List<int[]> grids = new List<int[]>(parsed.Length);
-
-        foreach(var p in parsed)
-        {
+        Func<string, int[]> parseLine = (string line) => {
             var grid = new int[81];
             for(int i = 0; i < 81; i++)
             {
-                if(p[i] == '.')
+                if(line[i] == '.')
                     grid[i] = 0;
                 else
-                    grid[i] = Int32.Parse(p[i].ToString());
+                    grid[i] = Int32.Parse(line[i].ToString());
             }
-            grids.Add(grid);
-        }
-
-        return grids;
+            return grid;
+        };
+        
+        return File.ReadLines(file_name)
+                    .Where(i => i.Count() > 0)
+                    .Select(parseLine)
+                    .ToList();
     }
 
     public static string gridToString(int[] grid)
@@ -117,7 +115,6 @@ static class SudokuUtils
     }
     
 }
-
 
 static class SudokuCSV
 {
