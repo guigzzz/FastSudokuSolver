@@ -4,3 +4,4 @@ obj
 *.txt
 *.csv
 packages
+BenchmarkDotNet.Artifacts

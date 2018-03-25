@@ -3,9 +3,11 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 
+using BenchmarkDotNet.Attributes;
+
 static class Benchmarks
 {
-    public static void JSolveBenchmark(int averages)
+    public static void JSolveBenchmark()
     {
         //http://attractivechaos.github.io/plb/
         var watch = new Stopwatch();
@@ -13,33 +15,27 @@ static class Benchmarks
         List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("data/worstcase.txt");
         
         SudokuSolver solver = new SudokuSolver();
-        long times = 0;
-        for(int a = 0; a < averages; a++)
+        watch.Start();
+        for(int i = 0; i < 50; i++)
         {
-            watch.Start();
-            for(int i = 0; i < 50; i++)
+            foreach(var s in sudokus)
             {
-                foreach(var s in sudokus)
-                {
-                    Sudoku solved = solver.solve(s);
-                    if(!SudokuUtils.isValidSudokuSolution(solved))
-                        throw new Exception(String.Format(
-                            "Failed for:\n {0}\n Got:\n{1}\n", 
-                            SudokuUtils.gridToString(s),
-                            SudokuUtils.gridToString(solved.grid)
-                            ));
-                }
+                Sudoku solved = solver.solve(s);
+                if(!SudokuUtils.isValidSudokuSolution(solved))
+                    throw new Exception(String.Format(
+                        "Failed for:\n {0}\n Got:\n{1}\n", 
+                        SudokuUtils.gridToString(s),
+                        SudokuUtils.gridToString(solved.grid)
+                        ));
             }
-            watch.Stop();
-            times += watch.ElapsedTicks;
         }
+        watch.Stop();
         
-        double time = times / (double)Stopwatch.Frequency;
-        time /= averages;
+        double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
         Console.WriteLine(String.Format(
-            "Average Time over {2} Jsolve benchmarks: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
-            time, time / (50 * sudokus.Count), averages
+            "Average Time for Jsolve benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+            time, time / (50 * sudokus.Count)
         ));
     }
     public static void OneMillionBenchmark()
@@ -103,12 +99,13 @@ static class Benchmarks
             "Time for 1465*64 benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
             time, time / (50 * sudokus.Count)
         ));
-    }
+    }    
+}
 
-    public static void top10sudokus(int averages)
-    {
-        
-        List<int[]> sudokus = new List<string>(){
+
+public class top10Bench
+{
+    List<int[]> sudokus = new List<string>(){
             "1....7.9..3..2...8..96..5....53..9...1..8...26....4...3......1..4......7..7...3..", //AI escargot
             ".......7..6..1...4..34..2..8....3.5...29..7...4..8...9.2..6...7...1..9..7....8.6.", //AI killer application
             "1..5..4....9.3.....7...8..5..1....3.8..6..5...9...7..8..4.2..1.2..8..6.......1..2", //AI lucky diamond
@@ -121,29 +118,14 @@ static class Benchmarks
             "4...6..7.......6...3...2..17....85...1.4......2.95..........7.5..91...3...3.4..8." //AI broken brick
         }.Select(i => SudokuUtils.parseLine(i)).ToList(); 
 
-        SudokuSolver solver = new SudokuSolver();
+    SudokuSolver solver = new SudokuSolver();
 
-
-        var watch = new Stopwatch();
-        watch.Start();
-
-        for(int i = 0; i < averages; i++)
+    [Benchmark]
+    public void solve()
+    {
+        foreach(var s in sudokus)
         {
-            foreach(var s in sudokus)
-            {
-                Sudoku solved = solver.solve(s);
-                if(!SudokuUtils.isValidSudokuSolution(solved))
-                    Console.WriteLine("Invalid solution found...");
-            }
-
+            solver.solve(s);
         }
-        
-        watch.Stop();
-        double time = watch.ElapsedTicks / (double)(Stopwatch.Frequency * averages);
-
-        Console.WriteLine(String.Format(
-            "Time for top10hardest benchmark: {0:#.####}s", time
-        ));
-
     }
 }
