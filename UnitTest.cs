@@ -5,7 +5,7 @@ using Xunit;
 
 public class UnitTest
 {
-    private List<int[]> data = 
+    private List<int[]> sudokus = 
         @".0............3.85..1.2.......5.7.....4...1...9.......5......73..2.1........4...9
         .......12........3..23..4....18....5.6..7.8.......9.....85.....9...4.5..47...6...
         .2..5.7..4..1....68....3...2....8..3.4..2.5.....6...1...2.9.....9......57.4...9..
@@ -34,10 +34,32 @@ public class UnitTest
     {
         SudokuSolver solver = new SudokuSolver();
 
-        foreach(var s in data)
+        foreach(var s in sudokus)
         {
             Sudoku solved = solver.solve(s);
             Assert.True(SudokuUtils.isValidSudokuSolution(solved));
         }
     }
+
+    int[] solvedsudoku = SudokuUtils.parseLine(
+        "839465712146782953752391486391824675564173829287659341628537194913248567475916238");
+
+    [Fact]
+    public void TestValidSolutionChecker()
+    {
+        Assert.True(SudokuUtils.isValidSudokuSolution(new Sudoku(solvedsudoku)));
+    }
+
+    int[] invalidsudoku = SudokuUtils.parseLine(
+        "..9.7...5..21..9..1...28....7...5..1..851.....5....3.......3..68........21.....87"
+    );
+
+    [Fact]
+    public void TestInvalidGrid()
+    {
+        SudokuSolver solver = new SudokuSolver();
+        Sudoku s = solver.solve(invalidsudoku);
+        Assert.Null(s);
+    }
+
 }
