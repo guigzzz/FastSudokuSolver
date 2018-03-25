@@ -61,4 +61,10 @@ Sample sudoku grids can be found [here](http://magictour.free.fr/sudoku.htm). In
 
 ## How it works
 
-In order to be efficient, this program relies on a an implicit binary representation of the rows, columns and houses in order to check the presence of a naked or hidden single.
+In order to be efficient, this program relies on a an implicit binary representation of the rows, columns and houses in order to check the presence of a naked or hidden single. The digits in each row, column and house can be reprensented using only 9-bits. This means that the information for which digits are present in each row, column and house can fit in 9 32-bit integers (where only 3*9=27 bits in each int will be used). 
+
+Checking for naked singles in any given slot is done by OR-ing the 9-bit representations for the associated row, column and house and checking if there is only a single 0 bit.
+
+Checking for hidden singles can be done by first computing the potential digits for each slot in the sudoku (represented yet again with 9 bits) and AND-ing the 9-bit representations accross any given row, column or house. If there is only a single set bit, then there is a hidden single in that particular row, column or house. In practice, the code only checks for hidden singles overs rows and columns as checking over houses also did not bring a measureable increase in solving speed.
+
+Checking for hidden singles is clearly slower than checking for naked singles. Due to this, the program will prioritise checking for naked singles, and will fallback to hidden singles only if no naked singles are found. Similarly, the program will fall-back to a brute force search if no naked or hidden singles are found. 
