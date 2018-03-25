@@ -58,3 +58,7 @@ if(!SudokuUtils.isValidSudokuSolution(solvedSudoku))
 
 Sample sudoku grids can be found [here](http://magictour.free.fr/sudoku.htm). In fact, the `JSolveBenchmark` and `sudoku1465Benchmark` functions in `Benchmarks.cs` rely respectively on [this file](https://github.com/attractivechaos/plb/blob/master/sudoku/sudoku.txt) and [this file](http://magictour.free.fr/top1465). 
 
+
+## How it works
+
+In order to be efficient, this program relies on a an implicit binary representation of the rows, columns and houses in order to check the presence of a naked or hidden single.
