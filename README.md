@@ -68,3 +68,7 @@ Checking for naked singles in any given slot is done by OR-ing the 9-bit represe
 Checking for hidden singles can be done by first computing the potential digits for each slot in the sudoku (represented yet again with 9 bits) and AND-ing the 9-bit representations accross any given row, column or house. If there is only a single set bit, then there is a hidden single in that particular row, column or house. In practice, the code only checks for hidden singles overs rows and columns as checking over houses also did not bring a measureable increase in solving speed.
 
 Checking for hidden singles is clearly slower than checking for naked singles. Due to this, the program will prioritise checking for naked singles, and will fallback to hidden singles only if no naked singles are found. Similarly, the program will fall-back to a brute force search if no naked or hidden singles are found. 
+
+## Results
+
+This program solves the [top10 hardest](http://www.aisudoku.com/en/AIwME.html) in <20 milliseconds. See `top10sudokus` in `Benchmark.cs` for code.

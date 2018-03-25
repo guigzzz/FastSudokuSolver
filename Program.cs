@@ -7,7 +7,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        Benchmarks.JSolveBenchmark(1);
+        Benchmarks.top10sudokus(1000);
+        // Benchmarks.JSolveBenchmark(1);
         // Benchmarks.OneMillionBenchmark();
         // Benchmarks.sudoku1465Benchmark();
     }
