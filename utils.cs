@@ -22,23 +22,24 @@ static class SudokuUtils
             return parsed;
     }
 
+    public static int[] parseLine(string line)
+    {
+        var grid = new int[81];
+        for(int i = 0; i < 81; i++)
+        {
+            if(line[i] == '.')
+                grid[i] = 0;
+            else
+                grid[i] = Int32.Parse(line[i].ToString());
+        }
+        return grid;
+    }
+
     public static List<int[]> loadFromFileDotNotation(string file_name)
     {
-        Func<string, int[]> parseLine = (string line) => {
-            var grid = new int[81];
-            for(int i = 0; i < 81; i++)
-            {
-                if(line[i] == '.')
-                    grid[i] = 0;
-                else
-                    grid[i] = Int32.Parse(line[i].ToString());
-            }
-            return grid;
-        };
-        
         return File.ReadLines(file_name)
                     .Where(i => i.Count() > 0)
-                    .Select(parseLine)
+                    .Select(SudokuUtils.parseLine)
                     .ToList();
     }
 
@@ -63,6 +64,7 @@ static class SudokuUtils
 
     public static bool isValidSudokuSolution(Sudoku sdku)
     {
+        // check colums and rows
         for(int i = 0; i < 9; i++)
         {
             int rowbin = 0;
@@ -89,6 +91,7 @@ static class SudokuUtils
             }
         }
 
+        // check houses
         for(int i = 0; i < 3; i++)
         {
             for(int j = 0; j < 3; j++)
