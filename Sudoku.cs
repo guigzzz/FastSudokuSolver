@@ -134,9 +134,8 @@ class SudokuSolver
         else change = (bool)nakedpasschange;
 
         if(!change)
-        {
             change = hiddenSinglePass(sdku);
-        }
+
         return change;
     }
 
