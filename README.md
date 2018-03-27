@@ -71,4 +71,4 @@ Checking for hidden singles is clearly slower than checking for naked singles. D
 
 ## Results
 
-This program solves the [top10 hardest](http://www.aisudoku.com/en/AIwME.html) in 2.9 +/- 0.03 milliseconds. See `top10sudokus` in `Benchmark.cs` for code.
+This program solves the [top10 hardest](http://www.aisudoku.com/en/AIwME.html) in 2.322 +/- 0.03 milliseconds. See `top10sudokus` in `Benchmark.cs` for code.

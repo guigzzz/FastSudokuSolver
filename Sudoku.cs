@@ -183,15 +183,17 @@ class SudokuSolver
         {
             for(int j = 0; j < 9; j++)
             {
-
-                int hidden = checkForHiddenSingle(sdku, i, j);
-                if(hidden > 0)
+                if(sdku.grid[i * 9 + j] == 0)
                 {
-                    sdku.grid[i * 9 + j] = hidden;
-                    change = true;
-                    sdku.BinaryTaken[i] |= 1 << (hidden - 1);
-                    sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
-                    sdku.BinaryTaken[j] |= 1 << (hidden + 9 - 1);
+                    int hidden = checkForHiddenSingle(sdku, i, j);
+                    if(hidden > 0)
+                    {
+                        sdku.grid[i * 9 + j] = hidden;
+                        change = true;
+                        sdku.BinaryTaken[i] |= 1 << (hidden - 1);
+                        sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
+                        sdku.BinaryTaken[j] |= 1 << (hidden + 9 - 1);
+                    }
                 }
             }
         }
