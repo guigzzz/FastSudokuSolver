@@ -37,7 +37,7 @@ public class UnitTest
         foreach(var s in sudokus)
         {
             Sudoku solved = solver.solve(s);
-            Assert.True(SudokuUtils.isValidSudokuSolution(solved));
+            Assert.True(SudokuUtils.isValidSudokuSolution(solved, s));
         }
     }
 
@@ -47,7 +47,7 @@ public class UnitTest
     [Fact]
     public void TestValidSolutionChecker()
     {
-        Assert.True(SudokuUtils.isValidSudokuSolution(new Sudoku(solvedsudoku)));
+        Assert.True(SudokuUtils.isValidSudokuSolution(new Sudoku(solvedsudoku), solvedsudoku));
     }
 
     int[] invalidsudoku = SudokuUtils.parseLine(

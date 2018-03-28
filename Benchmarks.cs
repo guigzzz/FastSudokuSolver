@@ -21,7 +21,7 @@ static class Benchmarks
             foreach(var s in sudokus)
             {
                 Sudoku solved = solver.solve(s);
-                if(!SudokuUtils.isValidSudokuSolution(solved))
+                if(!SudokuUtils.isValidSudokuSolution(solved, s))
                     throw new Exception(String.Format(
                         "Failed for:\n {0}\n Got:\n{1}\n", 
                         SudokuUtils.gridToString(s),
@@ -83,7 +83,7 @@ static class Benchmarks
             foreach(var s in sudokus)
             {
                 Sudoku solved = solver.solve(s);
-                if(!SudokuUtils.isValidSudokuSolution(solved))
+                if(!SudokuUtils.isValidSudokuSolution(solved, s))
                     throw new Exception(String.Format(
                         "Failed for:\n {0}\n Got:\n{1}\n", 
                         SudokuUtils.gridToString(s),

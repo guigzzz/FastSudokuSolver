@@ -62,7 +62,7 @@ static class SudokuUtils
         return builder.ToString();
     }
 
-    public static bool isValidSudokuSolution(Sudoku sdku)
+    public static bool isValidSudokuSolution(Sudoku sdku, int[] starting_grid)
     {
         // check colums and rows
         for(int i = 0; i < 9; i++)
@@ -114,7 +114,14 @@ static class SudokuUtils
                 }
             }
         }
-        return true;
+        // solution grid has all digits in all columns, rows and houses
+        // need to check that the returned grid still has the non-zero values from the 
+        // unsolved grid in the same positions
+        
+        return starting_grid.Zip(
+                sdku.grid, 
+                (first, second) => (first > 0) ? first == second : true
+            ).All(i => i == true);
     }
     
 }
