@@ -45,7 +45,7 @@ Sudoku solvedSudoku = solver.solve(sudoku);
 The following shows how to check the validity of the solution output by the solver (for testing purposes). This is achieved by making sure that each row, column and house has exactly one of every number 1 through 9.
 
 ```cs
-if(!SudokuUtils.isValidSudokuSolution(solvedSudoku))
+if(!SudokuUtils.isValidSudokuSolution(solvedSudoku, sudoku))
     throw new Exception(String.Format(
         "Failed for:\n {0}\n Got:\n{1}\n", 
         SudokuUtils.gridToString(sudoku),
@@ -71,4 +71,4 @@ Checking for hidden singles is clearly slower than checking for naked singles. D
 
 ## Results
 
-This program solves the [top10 hardest](http://www.aisudoku.com/en/AIwME.html) in 2.322 +/- 0.03 milliseconds. See `top10sudokus` in `Benchmark.cs` for code.
+This program solves the [top10 hardest](http://www.aisudoku.com/en/AIwME.html) in 2.322 +/- 0.03 milliseconds. See `top10Bench` in `Benchmark.cs` for code.

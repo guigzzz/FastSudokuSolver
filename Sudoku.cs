@@ -124,19 +124,11 @@ class SudokuSolver
 
     private bool? trysolve(Sudoku sdku)
     {
-        bool change = true;
-
-        change = false;
         // single naked
         bool? nakedpasschange = nakedSinglePass(sdku);
 
         if(nakedpasschange == null) return null;
-        else change = (bool)nakedpasschange;
-
-        if(!change)
-            change = hiddenSinglePass(sdku);
-
-        return change;
+        else return (nakedpasschange == false) ? hiddenSinglePass(sdku) : true;
     }
 
     private bool? nakedSinglePass(Sudoku sdku)
@@ -166,6 +158,7 @@ class SudokuSolver
                 }
             }
         }
+        
         return change;
     }
 
@@ -274,7 +267,7 @@ class SudokuSolver
         }
         return ret;
     }
-    private int HammingWeight(int value)
+    public int HammingWeight(int value)
     {
         value = value - ((value >> 1) & 0x55555555);
         value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
