@@ -5,7 +5,7 @@ using Xunit;
 
 public class UnitTest
 {
-    private List<int[]> sudokus = 
+    private List<int[]> sudokus =
         @".0............3.85..1.2.......5.7.....4...1...9.......5......73..2.1........4...9
         .......12........3..23..4....18....5.6..7.8.......9.....85.....9...4.5..47...6...
         .2..5.7..4..1....68....3...2....8..3.4..2.5.....6...1...2.9.....9......57.4...9..
@@ -34,7 +34,7 @@ public class UnitTest
     {
         SudokuSolver solver = new SudokuSolver();
 
-        foreach(var s in sudokus)
+        foreach (var s in sudokus)
         {
             Sudoku solved = solver.solve(s);
             Assert.NotNull(solved);

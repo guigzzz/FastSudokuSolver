@@ -13,28 +13,28 @@ static class Benchmarks
         var watch = new Stopwatch();
 
         List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("data/worstcase.txt");
-        
+
         SudokuSolver solver = new SudokuSolver();
         watch.Start();
-        for(int i = 0; i < 50; i++)
+        for (int i = 0; i < 50; i++)
         {
-            foreach(var s in sudokus)
+            foreach (var s in sudokus)
             {
                 Sudoku solved = solver.solve(s);
-                if(!SudokuUtils.isValidSudokuSolution(solved, s))
+                if (!SudokuUtils.isValidSudokuSolution(solved, s))
                     throw new Exception(String.Format(
-                        "Failed for:\n {0}\n Got:\n{1}\n", 
+                        "Failed for:\n {0}\n Got:\n{1}\n",
                         SudokuUtils.gridToString(s),
                         SudokuUtils.gridToString(solved.grid)
                         ));
             }
         }
         watch.Stop();
-        
+
         double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
         Console.WriteLine(String.Format(
-            "Average Time for Jsolve benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+            "Average Time for Jsolve benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s",
             time, time / (50 * sudokus.Count)
         ));
     }
@@ -46,14 +46,14 @@ static class Benchmarks
 
         var watch = new Stopwatch();
         watch.Start();
-        
-        foreach(var s in sudokus)
+
+        foreach (var s in sudokus)
         {
             Sudoku solved = solver.solve(s.Item1);
-            if(!solved.grid.SequenceEqual(s.Item2))
+            if (!solved.grid.SequenceEqual(s.Item2))
             {
                 throw new Exception(String.Format(
-                    "Failed for:\n {0}\n Got:\n{1}\nExpected:\n{2}\n", 
+                    "Failed for:\n {0}\n Got:\n{1}\nExpected:\n{2}\n",
                     SudokuUtils.gridToString(s.Item1),
                     SudokuUtils.gridToString(solved.grid),
                     SudokuUtils.gridToString(s.Item2)
@@ -61,11 +61,11 @@ static class Benchmarks
             }
         }
         watch.Stop();
-        
+
         double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
         Console.WriteLine(String.Format(
-            "Time for One Million Sudokus Benchmark: {0:#.####}s\nAverage time per grid: {1}s", 
+            "Time for One Million Sudokus Benchmark: {0:#.####}s\nAverage time per grid: {1}s",
             time, time / sudokus.Count
         ));
     }
@@ -73,33 +73,33 @@ static class Benchmarks
     public static void sudoku1465Benchmark()
     {
         List<int[]> sudokus = SudokuUtils.loadFromFileDotNotation("data/top1465.txt");
-        
+
         SudokuSolver solver = new SudokuSolver();
 
         var watch = new Stopwatch();
         watch.Start();
-        for(int i = 0; i < 64; i++)
+        for (int i = 0; i < 64; i++)
         {
-            foreach(var s in sudokus)
+            foreach (var s in sudokus)
             {
                 Sudoku solved = solver.solve(s);
-                if(!SudokuUtils.isValidSudokuSolution(solved, s))
+                if (!SudokuUtils.isValidSudokuSolution(solved, s))
                     throw new Exception(String.Format(
-                        "Failed for:\n {0}\n Got:\n{1}\n", 
+                        "Failed for:\n {0}\n Got:\n{1}\n",
                         SudokuUtils.gridToString(s),
                         SudokuUtils.gridToString(solved.grid)
                         ));
             }
         }
-        
+
         watch.Stop();
         double time = watch.ElapsedTicks / (double)Stopwatch.Frequency;
 
         Console.WriteLine(String.Format(
-            "Time for 1465*64 benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s", 
+            "Time for 1465*64 benchmark: {0:#.####}s\nAverage time per grid: {1:#.####}s",
             time, time / (50 * sudokus.Count)
         ));
-    }    
+    }
 }
 
 
@@ -116,14 +116,14 @@ public class top10Bench
             "1......6....1....3..5..29....9..1...7...4..8..3.5....25..4....6..8.6..7..7...5...", //AI honeypot
             "....1...4.3.2.....6....8.9...7.6...59....5.8....8..4...4.9..1..7....2.4...5.3...7", //AI tweezers
             "4...6..7.......6...3...2..17....85...1.4......2.95..........7.5..91...3...3.4..8." //AI broken brick
-        }.Select(i => SudokuUtils.parseLine(i)).ToList(); 
+        }.Select(i => SudokuUtils.parseLine(i)).ToList();
 
     SudokuSolver solver = new SudokuSolver();
 
     [Benchmark]
     public void solve()
     {
-        foreach(var s in sudokus)
+        foreach (var s in sudokus)
         {
             solver.solve(s);
         }

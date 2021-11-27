@@ -1,10 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Linq;
-
-using BenchmarkDotNet.Running;
-
+﻿using BenchmarkDotNet.Running;
 
 class Program
 {
