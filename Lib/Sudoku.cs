@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 
-class Sudoku
+public class Sudoku
 {
     public int[] grid = new int[9 * 9];
     int[] binarytaken = new int[9];
@@ -93,7 +93,7 @@ class Sudoku
     }
 }
 
-class SudokuSolver
+public class SudokuSolver
 {
 
     public Sudoku solve(int[] sdku)
@@ -238,9 +238,18 @@ class SudokuSolver
 
         for (int i = 0; i < 81; i++)
         {
+            if (sudoku.grid[i] > 0)
+            {
+                continue;
+            }
             // hamming weight == number of 1 bits
             int weight = HammingWeight(sudoku.Candidates[i]);
-            if (weight < minimum && sudoku.grid[i] == 0)
+            if (weight == 2)
+            {
+                return i;
+            }
+
+            if (weight < minimum)
             {
                 minimum = weight;
                 minindex = i;

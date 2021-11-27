@@ -4,7 +4,7 @@ using System.Text;
 using System.IO;
 using System.Collections.Generic;
 
-static class SudokuUtils
+public static class SudokuUtils
 {
     public static int[] loadFromFile(string file_name)
     {

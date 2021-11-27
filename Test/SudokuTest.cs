@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using NUnit.Framework;
 
+[TestFixture]
 public class UnitTest
 {
     private List<int[]> sudokus =
@@ -29,7 +29,7 @@ public class UnitTest
         .Split('\n').Select(i => SudokuUtils.parseLine(i.Trim())).ToList();
 
 
-    [Fact]
+    [Test]
     public void HardSudokus()
     {
         SudokuSolver solver = new SudokuSolver();
@@ -45,7 +45,7 @@ public class UnitTest
     int[] solvedsudoku = SudokuUtils.parseLine(
         "839465712146782953752391486391824675564173829287659341628537194913248567475916238");
 
-    [Fact]
+    [Test]
     public void TestValidSolutionChecker()
     {
         Assert.True(SudokuUtils.isValidSudokuSolution(new Sudoku(solvedsudoku), solvedsudoku));
@@ -55,7 +55,7 @@ public class UnitTest
         "..9.7...5..21..9..1...28....7...5..1..851.....5....3.......3..68........21.....87"
     );
 
-    [Fact]
+    [Test]
     public void TestInvalidGrid()
     {
         SudokuSolver solver = new SudokuSolver();
