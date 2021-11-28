@@ -1,13 +1,11 @@
 ﻿using BenchmarkDotNet.Running;
 
-class Program
+internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
-        // Benchmarks.JSolveBenchmark(1);
-        // Benchmarks.OneMillionBenchmark();
-        // Benchmarks.sudoku1465Benchmark();
-
-        var summary = BenchmarkRunner.Run<top10Bench>();
+        BenchmarkRunner.Run<worstcaseBench>();
+        // BenchmarkRunner.Run<top1465Bench>();
+        // BenchmarkRunner.Run<top10Bench>();
     }
 }

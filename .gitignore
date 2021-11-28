@@ -6,3 +6,5 @@ obj
 packages
 BenchmarkDotNet.Artifacts
 .vs
+.fake
+.ionide
