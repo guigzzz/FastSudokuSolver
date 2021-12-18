@@ -1,4 +1,4 @@
-# FastSudokuSolver
+# FastSudokuSolver [![.NET](https://github.com/guigzzz/FastSudokuSolver/actions/workflows/dotnet.yml/badge.svg)](https://github.com/guigzzz/FastSudokuSolver/actions/workflows/dotnet.yml)
 
 An attempt at writing a relatively fast sudoku solver
 
