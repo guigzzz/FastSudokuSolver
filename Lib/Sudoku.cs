@@ -1,51 +1,69 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-public class Sudoku
+public struct Sudoku
 {
-    public int[] grid = new int[9 * 9];
-
-
-    public Sudoku(int[] grid)
-    {
-        Array.Copy(grid, this.grid, 81);
-        updateBinaryRep();
-    }
+    public int[] Grid = new int[9 * 9];
 
     public int[] BinaryTaken { get; } = new int[9];
 
     public int[] Candidates { get; set; } = new int[9 * 9];
 
-    public void updateBinaryRep()
+    public Sudoku(int[] grid)
+    {
+        Array.Copy(grid, Grid, 81);
+        UpdateBinaryRep();
+    }
+
+
+    public Sudoku(int[] grid, int[] binaryTaken)
+    {
+        Array.Copy(grid, Grid, 81);
+        Array.Copy(binaryTaken, BinaryTaken, 9);
+    }
+
+    private void UpdateBinaryRep()
     {
         //build binary representation
         for (var i = 0; i < 9; i++)
-        for (var j = 0; j < 9; j++)
-        {
-            if (grid[i * 9 + j] > 0)
+            for (var j = 0; j < 9; j++)
             {
-                BinaryTaken[i] |= 1 << (grid[i * 9 + j] - 1);
-                BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (grid[i * 9 + j] + 18 - 1);
-            }
+                if (Grid[i * 9 + j] > 0)
+                {
+                    BinaryTaken[i] |= 1 << (Grid[i * 9 + j] - 1);
+                    BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (Grid[i * 9 + j] + 18 - 1);
+                }
 
-            if (grid[j * 9 + i] > 0)
-                BinaryTaken[i] |= 1 << (grid[j * 9 + i] + 9 - 1);
-        }
+                if (Grid[j * 9 + i] > 0)
+                    BinaryTaken[i] |= 1 << (Grid[j * 9 + i] + 9 - 1);
+            }
     }
 
-    public bool isSolved()
+    public void SetDigit(int i, int j, int digit)
     {
-        return BinaryTaken.All(i => i == 0x7FFFFFF);
+        Grid[i * 9 + j] = digit;
+        BinaryTaken[i] |= 1 << (digit - 1);
+        BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (digit + 18 - 1);
+        BinaryTaken[j] |= 1 << (digit + 9 - 1);
+    }
+
+    public bool IsSolved()
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            if (BinaryTaken[i] != 0x7FFFFFF)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public override string ToString()
     {
-        return SudokuUtils.gridToString(grid);
+        return SudokuUtils.GridToString(Grid);
     }
 
-    private int getPossibleDigits(Sudoku sudoku, int i, int j)
+    private int GetPossibleDigits(Sudoku sudoku, int i, int j)
     {
         var possibleDigits = ~(
             sudoku.BinaryTaken[i]
@@ -54,71 +72,38 @@ public class Sudoku
         ) & 0x1FF;
         return possibleDigits;
     }
-
-    public void printPossibleDigits()
-    {
-        for (var i = 0; i < 9; i++)
-        for (var j = 0; j < 9; j++)
-            Candidates[i * 9 + j] = grid[i * 9 + j] == 0
-                ? getPossibleDigits(this, i, j)
-                : 0;
-        var builder = new StringBuilder();
-        builder.AppendLine(new string('-', 93));
-        for (var i = 0; i < 9; i++)
-        {
-            if (i % 3 == 0 && i > 0) builder.AppendLine();
-            for (var j = 0; j < 9; j++)
-            {
-                if (j % 3 == 0 && j > 0) builder.Append("| ");
-
-                var checker = 0x100;
-                if (Candidates[i * 9 + j] > 0)
-                {
-                    for (var k = 9; k > 0; k--)
-                    {
-                        if ((Candidates[i * 9 + j] & checker) == checker) builder.Append(k.ToString());
-                        else builder.Append("-");
-                        checker >>= 1;
-                    }
-
-                    builder.Append(" ");
-                }
-                else
-                {
-                    builder.Append(string.Format("    {0}     ", grid[i * 9 + j]));
-                }
-            }
-
-            builder.AppendLine();
-        }
-
-        builder.AppendLine(new string('-', 93));
-
-        Console.WriteLine(builder);
-    }
 }
 
 public class SudokuSolver
 {
-    public Sudoku solve(int[] sdku)
+    public Sudoku? Solve(Sudoku sudoku)
     {
-        var sudoku = new Sudoku(sdku);
-
-        while (!sudoku.isSolved())
+        while (!sudoku.IsSolved())
         {
-            var hasChanged = trysolve(sudoku);
+            var hasChanged = TrySolve(sudoku);
 
             if (hasChanged == null) return null;
 
             if (hasChanged == false) // need to guess
             {
-                var guessloc = selectBestGuessLocation(sudoku);
-                var digits = digitsFromBits(sudoku.Candidates[guessloc]);
+                var guessloc = SelectBestGuessLocation(sudoku);
 
-                foreach (var d in digits)
+                var bits = sudoku.Candidates[guessloc];
+
+                for (var d = 1; d < 10; d++)
                 {
-                    sudoku.grid[guessloc] = d;
-                    var res = solve(sudoku.grid);
+                    var bitset = (bits & 1) == 1;
+                    bits >>= 1;
+
+                    if (!bitset)
+                    {
+                        continue;
+                    }
+
+                    var newSudoku = new Sudoku(sudoku.Grid, sudoku.BinaryTaken);
+                    newSudoku.SetDigit(guessloc / 9, guessloc % 9, d);
+
+                    var res = Solve(newSudoku);
                     if (res != null) return res;
                 }
 
@@ -129,70 +114,64 @@ public class SudokuSolver
         return sudoku;
     }
 
-    private bool? trysolve(Sudoku sdku)
+    private bool? TrySolve(Sudoku sdku)
     {
         // single naked
-        var nakedpasschange = nakedSinglePass(sdku);
+        var nakedpasschange = NakedSinglePass(sdku);
 
         if (nakedpasschange == null) return null;
-        return nakedpasschange == false ? hiddenSinglePass(sdku) : true;
+        return nakedpasschange == false ? HiddenSinglePass(sdku) : true;
     }
 
-    private bool? nakedSinglePass(Sudoku sdku)
+    private bool? NakedSinglePass(Sudoku sdku)
     {
         var change = false;
         for (var i = 0; i < 9; i++)
-        for (var j = 0; j < 9; j++)
-            if (sdku.grid[i * 9 + j] == 0)
-            {
-                var possibleDigits = getPossibleDigits(sdku, i, j);
-
-                // invalid grid
-                if (possibleDigits == 0) return null;
-
-                // if only single digit possible in (i, j)
-                if ((possibleDigits & (possibleDigits - 1)) == 0)
+            for (var j = 0; j < 9; j++)
+                if (sdku.Grid[i * 9 + j] == 0)
                 {
-                    var digit = (int)Math.Log(possibleDigits, 2) + 1;
-                    sdku.grid[i * 9 + j] = digit;
-                    sdku.BinaryTaken[i] |= 1 << (digit - 1);
-                    sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (digit + 18 - 1);
-                    sdku.BinaryTaken[j] |= 1 << (digit + 9 - 1);
-                    change = true;
+                    var possibleDigits = GetPossibleDigits(sdku, i, j);
+
+                    // invalid grid
+                    if (possibleDigits == 0) return null;
+
+                    // if only single digit possible in (i, j)
+                    if ((possibleDigits & (possibleDigits - 1)) == 0)
+                    {
+                        var digit = (int)Math.Log(possibleDigits, 2) + 1;
+                        sdku.SetDigit(i, j, digit);
+                        change = true;
+                    }
                 }
-            }
 
         return change;
     }
 
-    private bool hiddenSinglePass(Sudoku sdku)
+    private bool HiddenSinglePass(Sudoku sdku)
     {
         var change = false;
         for (var i = 0; i < 9; i++)
-        for (var j = 0; j < 9; j++)
-            sdku.Candidates[i * 9 + j] = sdku.grid[i * 9 + j] == 0
-                ? getPossibleDigits(sdku, i, j)
-                : 0;
+            for (var j = 0; j < 9; j++)
+                sdku.Candidates[i * 9 + j] = sdku.Grid[i * 9 + j] == 0
+                    ? GetPossibleDigits(sdku, i, j)
+                    : 0;
 
         for (var i = 0; i < 9; i++)
-        for (var j = 0; j < 9; j++)
-            if (sdku.grid[i * 9 + j] == 0)
-            {
-                var hidden = checkForHiddenSingle(sdku, i, j);
-                if (hidden > 0)
+            for (var j = 0; j < 9; j++)
+                if (sdku.Grid[i * 9 + j] == 0)
                 {
-                    sdku.grid[i * 9 + j] = hidden;
-                    change = true;
-                    sdku.BinaryTaken[i] |= 1 << (hidden - 1);
-                    sdku.BinaryTaken[i / 3 * 3 + j / 3] |= 1 << (hidden + 18 - 1);
-                    sdku.BinaryTaken[j] |= 1 << (hidden + 9 - 1);
+                    var hidden = CheckForHiddenSingle(sdku, i, j);
+                    if (hidden > 0)
+                    {
+                        sdku.SetDigit(i, j, hidden);
+                        change = true;
+                    }
                 }
-            }
 
         return change;
     }
 
-    private int checkForHiddenSingle(Sudoku sudoku, int i, int j)
+    private int CheckForHiddenSingle(Sudoku sudoku, int i, int j)
     {
         var rowhidden = sudoku.Candidates[i * 9 + j];
         var colhidden = rowhidden;
@@ -230,14 +209,14 @@ public class SudokuSolver
         return 0;
     }
 
-    private int selectBestGuessLocation(Sudoku sudoku)
+    private int SelectBestGuessLocation(Sudoku sudoku)
     {
         var minimum = 9;
         var minindex = 0;
 
         for (var i = 0; i < 81; i++)
         {
-            if (sudoku.grid[i] > 0) continue;
+            if (sudoku.Grid[i] > 0) continue;
             // hamming weight == number of 1 bits
             var weight = HammingWeight(sudoku.Candidates[i]);
             if (weight == 2) return i;
@@ -252,7 +231,7 @@ public class SudokuSolver
         return minindex;
     }
 
-    private int getPossibleDigits(Sudoku sudoku, int i, int j)
+    private int GetPossibleDigits(Sudoku sudoku, int i, int j)
     {
         var possibleDigits = ~(
             sudoku.BinaryTaken[i]
@@ -260,18 +239,6 @@ public class SudokuSolver
             | (sudoku.BinaryTaken[i / 3 * 3 + j / 3] >> 18)
         ) & 0x1FF;
         return possibleDigits;
-    }
-
-    private List<int> digitsFromBits(int bits)
-    {
-        var ret = new List<int>(9);
-        for (var i = 1; i < 10; i++)
-        {
-            if ((bits & 1) == 1) ret.Add(i);
-            bits >>= 1;
-        }
-
-        return ret;
     }
 
     public int HammingWeight(int value)

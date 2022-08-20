@@ -6,7 +6,7 @@ public class worstcaseBench
 {
     // http://attractivechaos.github.io/plb/
     private static readonly IEnumerable<int[]> suds =
-        SudokuUtils.loadFromFileDotNotation("/home/guillaume/code/FastSudokuSolver/data/worstcase.txt");
+        SudokuUtils.LoadFromFileDotNotation("/home/guillaume/code/FastSudokuSolver/data/worstcase.txt");
 
     private static readonly IEnumerable<int[]> sudokus = Enumerable.Range(0, 50).SelectMany(_ => suds).ToList();
 
@@ -16,7 +16,7 @@ public class worstcaseBench
     [Benchmark]
     public void solve()
     {
-        foreach (var s in sudokus) solver.solve(s);
+        foreach (var s in sudokus) solver.Solve(new Sudoku(s));
     }
 }
 
@@ -25,12 +25,12 @@ public class top1465Bench
     private readonly SudokuSolver solver = new();
 
     private readonly List<int[]> sudokus =
-        SudokuUtils.loadFromFileDotNotation("/home/guillaume/code/FastSudokuSolver/data/top1465.txt");
+        SudokuUtils.LoadFromFileDotNotation("/home/guillaume/code/FastSudokuSolver/data/top1465.txt");
 
     [Benchmark]
     public void solve()
     {
-        foreach (var s in sudokus) solver.solve(s);
+        foreach (var s in sudokus) solver.Solve(new Sudoku(s));
     }
 }
 
@@ -51,11 +51,11 @@ public class top10Bench
         "1......6....1....3..5..29....9..1...7...4..8..3.5....25..4....6..8.6..7..7...5...", //AI honeypot
         "....1...4.3.2.....6....8.9...7.6...59....5.8....8..4...4.9..1..7....2.4...5.3...7", //AI tweezers
         "4...6..7.......6...3...2..17....85...1.4......2.95..........7.5..91...3...3.4..8." //AI broken brick
-    }.Select(i => SudokuUtils.parseLine(i)).ToList();
+    }.Select(i => SudokuUtils.ParseLine(i)).ToList();
 
     [Benchmark]
     public void solve()
     {
-        foreach (var s in sudokus) solver.solve(s);
+        foreach (var s in sudokus) solver.Solve(new Sudoku(s));
     }
 }

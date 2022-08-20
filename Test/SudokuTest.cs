@@ -5,7 +5,19 @@ using NUnit.Framework;
 [TestFixture]
 public class UnitTest
 {
-    private readonly List<int[]> sudokus =
+    private static readonly int[] WorstCaseScenario = SudokuUtils.ParseLine(new string('.', 81));
+
+    [Test]
+    public void TestWorstCaseScenario()
+    {
+        var solver = new SudokuSolver();
+        var sudoku = new Sudoku(WorstCaseScenario);
+        var solved = solver.Solve(sudoku);
+        Assert.NotNull(solved);
+        Assert.True(SudokuUtils.IsValidSudokuSolution((Sudoku)solved, WorstCaseScenario));
+    }
+
+    private static readonly List<int[]> Sudokus =
         @".0............3.85..1.2.......5.7.....4...1...9.......5......73..2.1........4...9
         .......12........3..23..4....18....5.6..7.8.......9.....85.....9...4.5..47...6...
         .2..5.7..4..1....68....3...2....8..3.4..2.5.....6...1...2.9.....9......57.4...9..
@@ -26,7 +38,7 @@ public class UnitTest
         .......12....35......6...7.7.....3.....4..8..1...........12.....8.....4..5....6..
         1.......2.9.4...5...6...7...5.3.4.......6........58.4...2...6...3...9.8.7.......1
         .....1.2.3...4.5.....6....7..2.....1.8..9..3.4.....8..5....2....9..3.4....67....."
-            .Split('\n').Select(i => SudokuUtils.parseLine(i.Trim())).ToList();
+            .Split('\n').Select(i => SudokuUtils.ParseLine(i.Trim())).ToList();
 
 
     [Test]
@@ -34,24 +46,24 @@ public class UnitTest
     {
         var solver = new SudokuSolver();
 
-        foreach (var s in sudokus)
+        foreach (var s in Sudokus)
         {
-            var solved = solver.solve(s);
+            var solved = solver.Solve(new Sudoku(s));
             Assert.NotNull(solved);
-            Assert.True(SudokuUtils.isValidSudokuSolution(solved, s));
+            Assert.True(SudokuUtils.IsValidSudokuSolution((Sudoku)solved, s));
         }
     }
 
-    private readonly int[] solvedsudoku = SudokuUtils.parseLine(
+    private readonly int[] solvedsudoku = SudokuUtils.ParseLine(
         "839465712146782953752391486391824675564173829287659341628537194913248567475916238");
 
     [Test]
     public void TestValidSolutionChecker()
     {
-        Assert.True(SudokuUtils.isValidSudokuSolution(new Sudoku(solvedsudoku), solvedsudoku));
+        Assert.True(SudokuUtils.IsValidSudokuSolution(new Sudoku(solvedsudoku), solvedsudoku));
     }
 
-    private readonly int[] invalidsudoku = SudokuUtils.parseLine(
+    private readonly int[] invalidsudoku = SudokuUtils.ParseLine(
         "..9.7...5..21..9..1...28....7...5..1..851.....5....3.......3..68........21.....87"
     );
 
@@ -59,7 +71,7 @@ public class UnitTest
     public void TestInvalidGrid()
     {
         var solver = new SudokuSolver();
-        var s = solver.solve(invalidsudoku);
+        var s = solver.Solve(new Sudoku(invalidsudoku));
         Assert.Null(s);
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 
 public static class SudokuUtils
 {
-    public static int[] loadFromFile(string file_name)
+    public static int[] LoadFromFile(string file_name)
     {
         var parsed = File.ReadAllText(file_name)
             .Split('\n')
@@ -21,7 +21,7 @@ public static class SudokuUtils
         return parsed;
     }
 
-    public static int[] parseLine(string line)
+    public static int[] ParseLine(string line)
     {
         var grid = new int[81];
         for (var i = 0; i < 81; i++)
@@ -32,15 +32,15 @@ public static class SudokuUtils
         return grid;
     }
 
-    public static List<int[]> loadFromFileDotNotation(string file_name)
+    public static List<int[]> LoadFromFileDotNotation(string file_name)
     {
         return File.ReadLines(file_name)
             .Where(i => i.Count() > 0)
-            .Select(parseLine)
+            .Select(ParseLine)
             .ToList();
     }
 
-    public static string gridToString(int[] grid)
+    public static string GridToString(int[] grid)
     {
         var builder = new StringBuilder();
         builder.AppendLine("---------------------");
@@ -61,7 +61,7 @@ public static class SudokuUtils
         return builder.ToString();
     }
 
-    public static bool isValidSudokuSolution(Sudoku sdku, int[] starting_grid)
+    public static bool IsValidSudokuSolution(Sudoku sdku, int[] starting_grid)
     {
         // check colums and rows
         for (var i = 0; i < 9; i++)
@@ -71,8 +71,8 @@ public static class SudokuUtils
 
             for (var j = 0; j < 9; j++)
             {
-                rowbin |= 1 << (sdku.grid[i * 9 + j] - 1);
-                colbin |= 1 << (sdku.grid[j * 9 + i] - 1);
+                rowbin |= 1 << (sdku.Grid[i * 9 + j] - 1);
+                colbin |= 1 << (sdku.Grid[j * 9 + i] - 1);
             }
 
             if (rowbin != 0x1FF)
@@ -92,25 +92,25 @@ public static class SudokuUtils
 
         // check houses
         for (var i = 0; i < 3; i++)
-        for (var j = 0; j < 3; j++)
-        {
-            var housebin = 0;
-            for (var k1 = i * 3; k1 < (i + 1) * 3; k1++)
-            for (var k2 = j * 3; k2 < (j + 1) * 3; k2++)
-                housebin |= 1 << (sdku.grid[k1 * 9 + k2] - 1);
-            if (housebin != 0x1FF)
+            for (var j = 0; j < 3; j++)
             {
-                Console.WriteLine("Found invalid house {0} @ ({1},{2})",
-                    Convert.ToString(housebin & 0x1FF, 2).PadLeft(9, '0'), i + 1, j + 1);
-                return false;
+                var housebin = 0;
+                for (var k1 = i * 3; k1 < (i + 1) * 3; k1++)
+                    for (var k2 = j * 3; k2 < (j + 1) * 3; k2++)
+                        housebin |= 1 << (sdku.Grid[k1 * 9 + k2] - 1);
+                if (housebin != 0x1FF)
+                {
+                    Console.WriteLine("Found invalid house {0} @ ({1},{2})",
+                        Convert.ToString(housebin & 0x1FF, 2).PadLeft(9, '0'), i + 1, j + 1);
+                    return false;
+                }
             }
-        }
         // solution grid has all digits in all columns, rows and houses
         // need to check that the returned grid still has the non-zero values from the 
         // unsolved grid in the same positions
 
         return starting_grid.Zip(
-            sdku.grid,
+            sdku.Grid,
             (first, second) => first > 0 ? first == second : true
         ).All(i => i);
     }
@@ -118,7 +118,7 @@ public static class SudokuUtils
 
 internal static class SudokuCSV
 {
-    private static Tuple<int[], int[]> rowToTuple(string[] row)
+    private static Tuple<int[], int[]> RowToTuple(string[] row)
     {
         return new Tuple<int[], int[]>(
             row[0].Select(i => int.Parse(i.ToString())).ToArray(),
@@ -126,13 +126,13 @@ internal static class SudokuCSV
         );
     }
 
-    public static List<Tuple<int[], int[]>> readFromCSV(
+    public static List<Tuple<int[], int[]>> ReadFromCSV(
         string filename, int number = 10)
     {
         var parsed = File.ReadLines(filename)
             .Skip(1).Take(number)
             .Select(
-                row => rowToTuple(row.Trim().Split(','))
+                row => RowToTuple(row.Trim().Split(','))
             ).ToList();
 
         return parsed;
