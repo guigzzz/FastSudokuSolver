@@ -6,9 +6,9 @@ using System.Text;
 
 public static class SudokuUtils
 {
-    public static int[] LoadFromFile(string file_name)
+    public static int[] LoadFromFile(string filename)
     {
-        var parsed = File.ReadAllText(file_name)
+        var parsed = File.ReadAllText(filename)
             .Split('\n')
             .Select(
                 row => row.Trim().Split(' ').Select(s => int.Parse(s))
@@ -32,9 +32,9 @@ public static class SudokuUtils
         return grid;
     }
 
-    public static List<int[]> LoadFromFileDotNotation(string file_name)
+    public static List<int[]> LoadFromFileDotNotation(string filename)
     {
-        return File.ReadLines(file_name)
+        return File.ReadLines(filename)
             .Where(i => i.Count() > 0)
             .Select(ParseLine)
             .ToList();
@@ -61,7 +61,7 @@ public static class SudokuUtils
         return builder.ToString();
     }
 
-    public static bool IsValidSudokuSolution(Sudoku sdku, int[] starting_grid)
+    public static bool IsValidSudokuSolution(Sudoku sdku, int[] startingGrid)
     {
         // check colums and rows
         for (var i = 0; i < 9; i++)
@@ -109,7 +109,7 @@ public static class SudokuUtils
         // need to check that the returned grid still has the non-zero values from the 
         // unsolved grid in the same positions
 
-        return starting_grid.Zip(
+        return startingGrid.Zip(
             sdku.Grid,
             (first, second) => first > 0 ? first == second : true
         ).All(i => i);

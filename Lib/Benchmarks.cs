@@ -2,44 +2,44 @@ using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 
-public class worstcaseBench
+public class WorstcaseBench
 {
     // http://attractivechaos.github.io/plb/
-    private static readonly IEnumerable<int[]> suds =
+    private static readonly IEnumerable<int[]> Suds =
         SudokuUtils.LoadFromFileDotNotation("/home/guillaume/code/FastSudokuSolver/data/worstcase.txt");
 
-    private static readonly IEnumerable<int[]> sudokus = Enumerable.Range(0, 50).SelectMany(_ => suds).ToList();
+    private static readonly IEnumerable<int[]> Sudokus =
+        Enumerable.Range(0, 50).SelectMany(_ => Suds).ToList();
 
-
-    private readonly SudokuSolver solver = new();
+    private static readonly SudokuSolver Solver = new();
 
     [Benchmark]
-    public void solve()
+    public void Solve()
     {
-        foreach (var s in sudokus) solver.Solve(new Sudoku(s));
+        foreach (var s in Sudokus) Solver.Solve(new Sudoku(s));
     }
 }
 
-public class top1465Bench
+public class Top1465Bench
 {
-    private readonly SudokuSolver solver = new();
+    private static readonly SudokuSolver Solver = new();
 
-    private readonly List<int[]> sudokus =
+    private static readonly List<int[]> Sudokus =
         SudokuUtils.LoadFromFileDotNotation("/home/guillaume/code/FastSudokuSolver/data/top1465.txt");
 
     [Benchmark]
-    public void solve()
+    public void Solve()
     {
-        foreach (var s in sudokus) solver.Solve(new Sudoku(s));
+        foreach (var s in Sudokus) Solver.Solve(new Sudoku(s));
     }
 }
 
 
-public class top10Bench
+public class Top10Bench
 {
-    private readonly SudokuSolver solver = new();
+    private static readonly SudokuSolver Solver = new();
 
-    private readonly List<int[]> sudokus = new List<string>
+    private static readonly List<int[]> Sudokus = new List<string>
     {
         "1....7.9..3..2...8..96..5....53..9...1..8...26....4...3......1..4......7..7...3..", //AI escargot
         ".......7..6..1...4..34..2..8....3.5...29..7...4..8...9.2..6...7...1..9..7....8.6.", //AI killer application
@@ -54,8 +54,8 @@ public class top10Bench
     }.Select(i => SudokuUtils.ParseLine(i)).ToList();
 
     [Benchmark]
-    public void solve()
+    public void Solve()
     {
-        foreach (var s in sudokus) solver.Solve(new Sudoku(s));
+        foreach (var s in Sudokus) Solver.Solve(new Sudoku(s));
     }
 }

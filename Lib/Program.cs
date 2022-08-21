@@ -4,9 +4,9 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        BenchmarkRunner.Run<worstcaseBench>();
-        // BenchmarkRunner.Run<top1465Bench>();
-        // BenchmarkRunner.Run<top10Bench>();
+        BenchmarkRunner.Run<WorstcaseBench>();
+        // BenchmarkRunner.Run<Top1465Bench>();
+        // BenchmarkRunner.Run<Top10Bench>();
 
         // var bench = new worstcaseBench();
 
