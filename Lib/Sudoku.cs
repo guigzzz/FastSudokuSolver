@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 public struct Sudoku
 {
@@ -21,7 +22,7 @@ public struct Sudoku
         Array.Copy(binaryTaken, BinaryTaken, 9);
     }
 
-    private void UpdateBinaryRep()
+    private readonly void UpdateBinaryRep()
     {
         //build binary representation
         for (var i = 0; i < 9; i++)
@@ -38,7 +39,7 @@ public struct Sudoku
             }
     }
 
-    public void SetDigit(int i, int j, int digit)
+    public readonly void SetDigit(int i, int j, int digit)
     {
         Grid[i * 9 + j] = digit;
         BinaryTaken[i] |= 1 << (digit - 1);
@@ -46,7 +47,7 @@ public struct Sudoku
         BinaryTaken[j] |= 1 << (digit + 9 - 1);
     }
 
-    public bool IsSolved()
+    public readonly bool IsSolved()
     {
         for (int i = 0; i < 9; i++)
         {
@@ -58,19 +59,9 @@ public struct Sudoku
         return true;
     }
 
-    public override string ToString()
+    public override readonly string ToString()
     {
         return SudokuUtils.GridToString(Grid);
-    }
-
-    private int GetPossibleDigits(Sudoku sudoku, int i, int j)
-    {
-        var possibleDigits = ~(
-            sudoku.BinaryTaken[i]
-            | (sudoku.BinaryTaken[j] >> 9)
-            | (sudoku.BinaryTaken[i / 3 * 3 + j / 3] >> 18)
-        ) & 0x1FF;
-        return possibleDigits;
     }
 }
 
@@ -114,7 +105,7 @@ public class SudokuSolver
         return sudoku;
     }
 
-    private bool? TrySolve(Sudoku sdku)
+    private static bool? TrySolve(Sudoku sdku)
     {
         // single naked
         var nakedpasschange = NakedSinglePass(sdku);
@@ -123,7 +114,7 @@ public class SudokuSolver
         return nakedpasschange == false ? HiddenSinglePass(sdku) : true;
     }
 
-    private bool? NakedSinglePass(Sudoku sdku)
+    private static bool? NakedSinglePass(Sudoku sdku)
     {
         var change = false;
         for (var i = 0; i < 9; i++)
@@ -147,7 +138,7 @@ public class SudokuSolver
         return change;
     }
 
-    private bool HiddenSinglePass(Sudoku sdku)
+    private static bool HiddenSinglePass(Sudoku sdku)
     {
         var change = false;
         for (var i = 0; i < 9; i++)
@@ -171,7 +162,7 @@ public class SudokuSolver
         return change;
     }
 
-    private int CheckForHiddenSingle(Sudoku sudoku, int i, int j)
+    private static int CheckForHiddenSingle(Sudoku sudoku, int i, int j)
     {
         var rowhidden = sudoku.Candidates[i * 9 + j];
         var colhidden = rowhidden;
@@ -209,7 +200,7 @@ public class SudokuSolver
         return 0;
     }
 
-    private int SelectBestGuessLocation(Sudoku sudoku)
+    private static int SelectBestGuessLocation(Sudoku sudoku)
     {
         var minimum = 9;
         var minindex = 0;
@@ -231,7 +222,7 @@ public class SudokuSolver
         return minindex;
     }
 
-    private int GetPossibleDigits(Sudoku sudoku, int i, int j)
+    private static int GetPossibleDigits(Sudoku sudoku, int i, int j)
     {
         var possibleDigits = ~(
             sudoku.BinaryTaken[i]
@@ -241,10 +232,5 @@ public class SudokuSolver
         return possibleDigits;
     }
 
-    public int HammingWeight(int value)
-    {
-        value = value - ((value >> 1) & 0x55555555);
-        value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
-        return (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
-    }
+    public static int HammingWeight(int value) => BitOperations.PopCount((uint)value);
 }

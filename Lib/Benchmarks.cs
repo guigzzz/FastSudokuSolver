@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 
+#pragma warning disable CA1822
+
 public class WorstcaseBench
 {
     // http://attractivechaos.github.io/plb/
