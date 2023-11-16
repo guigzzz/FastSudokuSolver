@@ -2,18 +2,17 @@
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static void Main(string[] _)
     {
         // BenchmarkRunner.Run<WorstcaseBench>();
         // BenchmarkRunner.Run<Top1465Bench>();
         BenchmarkRunner.Run<Top10Bench>();
 
-        // var bench = new worstcaseBench();
+        // var bench = new Top10Bench();
 
-        // for (var i = 0; i < 5; i++)
+        // while (true)
         // {
-        //     Console.WriteLine(i);
-        // bench.solve();
+        //     bench.Solve();
         // }
     }
 }

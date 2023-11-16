@@ -209,7 +209,7 @@ public class SudokuSolver
         {
             if (sudoku.Grid[i] > 0) continue;
             // hamming weight == number of 1 bits
-            var weight = HammingWeight(sudoku.Candidates[i]);
+            var weight = BitOperations.PopCount((uint)sudoku.Candidates[i]);
             if (weight == 2) return i;
 
             if (weight < minimum)
@@ -231,6 +231,4 @@ public class SudokuSolver
         ) & 0x1FF;
         return possibleDigits;
     }
-
-    public static int HammingWeight(int value) => BitOperations.PopCount((uint)value);
 }
